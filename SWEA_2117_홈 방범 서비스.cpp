@@ -1,108 +1,94 @@
 #include <iostream>
 #include <queue>
+#include <cstring>
 
 using namespace std;
 
-int t;
-int n, m;
+int t, n, m;
 int map[21][21];
+bool visited[21][21];
 int ans = 0;
+
+//ì„¼í„°ì™€ ë°‘ì´ ì°¨ì´ê°€ (k - 1)
+
+int dx[4] = { 1,-1,0,0 };
+int dy[4] = { 0,0,1,-1 };
+
 
 bool inrange(int x, int y) {
 	if (1 <= x && x <= n && 1 <= y && y <= n) {
-		return true; 
+		return true;
 	}
-	return false; 
+	return false;
 }
+void make_center(int x, int y, int k) {
 
-void center(int x, int y, int k) {
-	
-	//°°Àº Çà
+	int home_cnt = 0;
 
-	int cnt = 0;
-	if (map[x][y]) {
-		cnt++;
-	}
-	for (int i = 1; i < k; i++) {
+	int start_y = y - (k - 1);
+	int end_y = y + (k - 1);
 
-		int ny = y - i;
+	//center í–‰
+	for (int ny = start_y; ny <= end_y; ny++) {
 		if (inrange(x, ny) && map[x][ny]) {
-			cnt++;
+			home_cnt++;
 		}
-		ny = y + i; 
-		if (inrange(x, ny) && map[x][ny]){
-			cnt++;
+	}
+
+	//topë¶€í„° center ë°”ë¡œ ìœ— í–‰ê¹Œì§€
+	int top_x = x - (k - 1);
+
+	for (int i = 0; i < k - 1; i++) {
+		start_y = y - i;
+		end_y = y + i;
+		for (int j = start_y; j <= end_y; j++) {
+			if (inrange(top_x, j) && map[top_x][j]) {
+				home_cnt++;
+			}
 		}
+		top_x++;
+	}
+
+	//bottomë¶€í„° center ë°”ë¡œ ì•„ë˜ í–‰ê¹Œì§€
+	int bottom_x = x + (k - 1);
+
+	for (int i = 0; i < k - 1; i++) {
+		start_y = y - i;
+		end_y = y + i;
+		for (int j = start_y; j <= end_y; j++) {
+			if (inrange(bottom_x, j) && map[bottom_x][j]) {
+				home_cnt++;
+			}
+		}
+		bottom_x--;
 	}
 	
-	//´Ù¸¥ Çà
-	int num = k - 2;
 
+	int ìš´ì˜ë¹„ìš© = k * k + (k - 1) * (k - 1);
+	int ìˆ˜ìµ = m * home_cnt; //3 * 9 = 27
+	int ì´ìµ = ìˆ˜ìµ - ìš´ì˜ë¹„ìš©; //36
 
-	for (int i = 1; i < k; i++) {
-		int nx = x - i;
-		//À§ Çà
-		if (inrange(nx, y) && map[nx][y]) {
-			cnt++;
-		}
-		for (int j = 1; j <= num; j++) {
-			int ny = y + j;
-
-			if (inrange(nx,ny) && map[nx][ny]) {
-				cnt++;
-			}
-			ny = y - j;
-			if (inrange(nx, ny) && map[nx][ny]) {
-				cnt++;
-			}
-		}
-		num--;
-	}
-
-	num = k - 2;
-
-	for (int i = 1; i < k; i++) {
-
-		int nx = x + i;
-
-		//¾Æ·¡ Çà
-		if (inrange(nx, y) && map[nx][y]) {
-			cnt++;
-		}
-
-		for (int j = 1; j <= num; j++) {
-			int ny = y + j;
-
-			if (inrange(nx, ny) && map[nx][ny]) {
-				cnt++;
-			}
-			ny = y - j;
-			if (inrange(nx, ny) && map[nx][ny]) {
-				cnt++;
-			}
-		}
-		num--;
-	}
-
-	int ¿î¿µºñ¿ë = k * k + (k - 1) * (k - 1);
-	int ¼öÀÍ = cnt * m;
-	int ÀÌÀÍ = ¼öÀÍ - ¿î¿µºñ¿ë;
-
-	if (ÀÌÀÍ >= 0) {
-		ans = max(ans, cnt);
+	if (ì´ìµ >= 0) {
+		ans = max(home_cnt, ans);
 	}
 }
+void center(int x, int y) {
+	//(x,y)ì—ì„œ centerì¼ ë•Œ
 
+	int max_k = 2 * n;
+
+	for (int i = 1; i <= max_k; i++) {
+		make_center(x, y, i);
+	}
+}
 void solution() {
 
-	int max_k = n * n;
 
 	ans = 0;
-	for (int k = 1; k <= max_k; k++) {
-		for (int i = 1; i <= n; i++) {
-			for (int j = 1; j <= n; j++) {
-				center(i, j, k);
-			}
+
+	for (int i = 1; i <= n; i++) {
+		for (int j = 1; j <= n; j++) {
+			center(i, j);
 		}
 	}
 }
@@ -111,7 +97,7 @@ void input() {
 
 	cin >> t;
 
-	for(int tc = 1; tc <= t; tc++) {
+	for (int tc = 1; tc <= t; tc++) {
 		cin >> n >> m;
 
 		for (int i = 1; i <= n; i++) {
@@ -119,17 +105,17 @@ void input() {
 				cin >> map[i][j];
 			}
 		}
+
 		solution();
-		cout << "#" << tc << " " << ans << "\n";
+
+		cout << "#" << tc <<" " << ans << "\n";
 	}
 	
 }
-
 int main() {
 	ios_base::sync_with_stdio(0);
 	cin.tie(0);
 	cout.tie(0);
 
 	input();
-	solution();
 }
